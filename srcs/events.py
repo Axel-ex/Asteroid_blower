@@ -40,6 +40,7 @@ class Keyboard:
 class GameStats:
 	def __init__(self, spacewar):
 		self.settings = spacewar.settings
+		self.player_name = ""
 		self.nb_lifes = self.settings.nb_ships
 		self.game_on = False
 		self.can_lose_life = True

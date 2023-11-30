@@ -3,6 +3,7 @@ import pygame as pg
 import random as rd
 import time
 import sys
+from pathlib import Path
 
 
 class Background(Sprite):
@@ -38,6 +39,7 @@ class Background(Sprite):
 			pg.draw.circle(self.screen, self.color, sprite.center, radius)
 			                                                    
 
+
 class Menu:
 	def __init__(self, spacewar):
 		self.screen = spacewar.screen
@@ -45,7 +47,7 @@ class Menu:
 		self.stats = spacewar.stats
 		self.prompt = self.settings.prompt
 
-		self.font = pg.font.Font('freesansbold.ttf', 30)
+		self.font = pg.font.Font('freesansbold.ttf', 40)
 		self.color = (255, 255, 255)
 		self.text = self.font.render(self.prompt, True, self.color)
 		self.rect = self.text.get_rect()
@@ -53,18 +55,32 @@ class Menu:
 		self.subfont = pg.font.Font('freesansbold.ttf', 20)
 		self.subtext = self.subfont.render("press space to play, q to quit", True, self.color)
 		self.subrect = self.subtext.get_rect()
+		self.user_text = self.subfont.render("Enter your username in the terminal", True, self.color)
+		self.user_text_rect = self.user_text.get_rect()
 
+	def update_best_score(self):
+		file = Path("../best_scores.txt")
+		best_score = f"{self.stats.player_name}: {self.stats.score}\n"
+		file.write_text(file.read_text() + best_score)
+	
 	def game_over(self):
 		self.text = self.font.render("GAME OVER", True, (255, 255, 255))
 		self.rect = self.text.get_rect()
 		self.stats.game_on = False
 		self.get_key_event()
 
+	def update_username(self):
+		self.user_text_rect.midtop = self.subrect.midbottom
+		self.screen.blit(self.user_text, self.user_text_rect)
+		self.stats.player_name = input("Enter a player name:\n")
+
 	def get_key_event(self):
 		for event in pg.event.get():
 			if event.type == pg.KEYDOWN:
+				self.update_best_score()
 				if event.key == pg.K_SPACE:
 					self.stats.reset()
+					self.update_username()
 				if event.key == pg.K_q or event.key == pg.QUIT:
 					sys.exit()
 
@@ -112,7 +128,7 @@ class LifeBar(Sprite):
 	def create(self):
 		self.sprites.clear()
 		for i in range(self.settings.nb_ships):
-			new_sprite = pg.image.load("assets/heart_pix.bmp")
+			new_sprite = pg.image.load("../assets/heart_pix.bmp")
 			new_sprite = pg.transform.scale(new_sprite, (20, 20))
 			self.sprites.append(new_sprite)
 
