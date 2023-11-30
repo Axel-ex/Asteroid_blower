@@ -1,9 +1,10 @@
 import pygame as pg
-import time
 from settings import *
-from sprite_classes import *
-from keyboard_events import *
-from game_stats import *
+from player import *
+from destructibles import *
+from events import *
+from interface import *
+
 
 class	spacewar():
 	''' Clas to manage assets and behaviour'''
@@ -31,9 +32,9 @@ class	spacewar():
 		self.ship_explosion = pg.sprite.Group()
 		self.create_asteroids()
 
-	# def display_menu(self):
 
 	def create_asteroids(self):
+		self.asteroids.empty()
 		for i in range(self.settings.nb_asteroids):
 			asteroid = Asteroid(self)
 			self.asteroids.add(asteroid)
@@ -47,18 +48,12 @@ class	spacewar():
 		collision = pg.sprite.groupcollide(self.bullets, self.asteroids, True, True)	
 		for bullets, asteroids in collision.items():
 			for asteroid in asteroids:
-				explosion = Explosion(self, asteroid.rect.center, self.settings.explosion_sprites)
+				explosion = Explosion(self, asteroid.rect.center, self.settings.explosion_ship)
 				self.explosions.add(explosion)
 				self.stats.score += 10
 		if pg.sprite.spritecollideany(self.ship, self.asteroids):
 			self.ship.collision_update()
 			self.stats.got_hit = True
-
-	def animate_explosion(self):
-		if self.stats.is_dead == False:
-			return
-		explosion = Explosion(self, self.ship.rect.center, self.settings.explosion_ship)
-		self.ship_explosion.add(explosion)
 
 	def update_bullets(self):
 		for bullet in self.bullets.sprites():
@@ -71,9 +66,20 @@ class	spacewar():
 		if len(self.asteroids) == 0:
 			self.settings.nb_asteroids += 5
 			self.create_asteroids()
+	
+	def reset(self):
+		if not self.stats.reset_flag:
+			return
+		self.life_bar.create()
+		self.create_asteroids()
+		self.stats.reset_flag = False
 
 	def	update_screen(self):
+		if self.stats.reset_flag:
+			self.reset()
 		self.background.update()
+		for asteroid in self.asteroids.sprites():
+			asteroid.update()
 		if self.stats.game_on == False:
 			return
 		self.life_bar.update()
@@ -81,8 +87,6 @@ class	spacewar():
 		self.ship.update()
 		self.ship_explosion.update()
 		self.actualize_asteroids()
-		for asteroid in self.asteroids.sprites():
-			asteroid.update()
 		for explosion in self.explosions.sprites():
 			explosion.update()
 		self.bullets.update()
@@ -90,26 +94,28 @@ class	spacewar():
 	
 	def blit_next_frame(self):
 		self.background.blit()
-		if self.stats.game_on == True:
-			self.animate_explosion()
-			if (self.ship_explosion and self.stats.stop == False):
-				for explo in self.ship_explosion.sprites():
-					explo.blit()
+		self.menu.display()
+		if self.stats.game_on and not self.stats.is_dead:
 			self.ship.blit()
 			self.thruster.blit()
-			for asteroid in self.asteroids.sprites():
-				asteroid.blit()
+			self.update_bullets()
+			self.life_bar.blit()
+			self.score_counter.blit()
 			for explosion in self.explosions.sprites():
 				explosion.blit()
-			self.life_bar.blit()
-			self.update_bullets()
-			self.score_counter.blit()
+		for asteroid in self.asteroids.sprites():
+			asteroid.blit()
+		if self.stats.is_dead and not self.stats.stop:
+			self.ship.animate_death()
+		elif self.stats.stop:
+			self.menu.game_over()
+			self.reset()
 		pg.display.flip()
 		
 	def run_game(self):
 		while True:
-			self.menu.display()
-			self.keyboard.get_event(self)
+			if self.stats.game_on:
+				self.keyboard.get_event(self)
 			self.update_screen()
 			self.blit_next_frame()
 			self.clock.tick(30)

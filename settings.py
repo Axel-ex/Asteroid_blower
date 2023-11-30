@@ -17,7 +17,7 @@ class settings:
 
 		#bullet setting
 		self.bullet_radius = 6
-		self.bullet_speed = 5
+		self.bullet_speed = 10
 		self.bullet_color = (235, 116, 199)
 		self.nb_bullets = 5
 
