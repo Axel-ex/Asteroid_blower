@@ -60,7 +60,7 @@ class settings:
 
 		#explosion settings
 		self.explosion_size = 250
-		self.explosion_sprites = [
+		self.explosion_ship = [
             "../assets/explosion/explosion1/1.bmp",
             "../assets/explosion/explosion1/2.bmp",
             "../assets/explosion/explosion1/3.bmp",
@@ -126,7 +126,7 @@ class settings:
 			"../assets/explosion/explosion1/63.bmp",
 		]
 		#Ship's explosion
-		self.explosion_ship = [
+		self.explosion_asteroid = [
 		    "../assets/explosion/explosion2/1.bmp",
             "../assets/explosion/explosion2/2.bmp",
             "../assets/explosion/explosion2/3.bmp",

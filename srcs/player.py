@@ -102,6 +102,3 @@ class Bullet(Sprite):
 	
 	def draw_bullet(self):
 		pg.draw.circle(self.screen, self.color, self.rect.center, self.settings.bullet_radius)
-
-
-	

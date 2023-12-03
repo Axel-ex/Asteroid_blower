@@ -1,2 +1,7 @@
 BEST_SCORES
-Axel: 5050
+Axel: 4180 in 6.06 mins
+Ines: 670 in 2.15 mins
+cul: 7140 in 9.12 mins
+Axel: 4830 in 5.88 mins
+Axel: 1320 in 8.25 mins
+de: 20 in 0.42 mins

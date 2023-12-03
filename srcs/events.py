@@ -1,6 +1,31 @@
 import pygame as pg
 import sys
 import time
+from pathlib import Path
+
+class GameStats:
+	def __init__(self, spacewar):
+		self.settings = spacewar.settings
+		self.player_name = ""
+		self.nb_lifes = self.settings.nb_ships
+		self.game_on = False
+		self.can_lose_life = True
+		self.last_hit = time.time()
+		self.got_hit = False
+		self.score = 0
+		self.is_dead = False
+		self.stop = False
+		self.reset_flag = False
+		self.start_time = time.time()
+
+	def reset(self):
+		self.settings.nb_asteroids = 5
+		self.score = 0
+		self.nb_lifes = self.settings.nb_ships
+		self.game_on = True
+		self.is_dead = False
+		self.stop = False
+		self.reset_flag = True
 
 
 class Keyboard:
@@ -34,29 +59,4 @@ class Keyboard:
 				self.get_keydown_events(event, spacewar)
 			elif event.type == pg.KEYUP:
 				self.get_keyup_events(event, spacewar)
-
-
-
-class GameStats:
-	def __init__(self, spacewar):
-		self.settings = spacewar.settings
-		self.player_name = ""
-		self.nb_lifes = self.settings.nb_ships
-		self.game_on = False
-		self.can_lose_life = True
-		self.last_hit = time.time()
-		self.got_hit = False
-		self.score = 0
-		self.is_dead = False
-		self.stop = False
-		self.reset_flag = False
-
-	def reset(self):
-		self.settings.nb_asteroids = 5
-		self.score = 0
-		self.nb_lifes = self.settings.nb_ships
-		self.game_on = True
-		self.is_dead = False
-		self.stop = False
-		self.reset_flag = True
 

@@ -4,6 +4,7 @@ import random as rd
 import time
 import sys
 from pathlib import Path
+from events import *
 
 
 class Background(Sprite):
@@ -46,6 +47,7 @@ class Menu:
 		self.settings = spacewar.settings
 		self.stats = spacewar.stats
 		self.prompt = self.settings.prompt
+		self.score_board = ScoreBoard(spacewar)
 
 		self.font = pg.font.Font('freesansbold.ttf', 40)
 		self.color = (255, 255, 255)
@@ -55,29 +57,35 @@ class Menu:
 		self.subfont = pg.font.Font('freesansbold.ttf', 20)
 		self.subtext = self.subfont.render("press space to play, q to quit", True, self.color)
 		self.subrect = self.subtext.get_rect()
-		self.user_text = self.subfont.render("Enter your username in the terminal", True, self.color)
+		self.user_text = self.font.render("Enter your username in the terminal", True, self.color)
 		self.user_text_rect = self.user_text.get_rect()
 
 	def update_best_score(self):
+		if not self.stats.score:
+			return
 		file = Path("../best_scores.txt")
-		best_score = f"{self.stats.player_name}: {self.stats.score}\n"
+		time_spent = time.time() - self.stats.start_time
+		best_score = f"{self.stats.player_name}: {self.stats.score} in {time_spent/60:.2f} mins\n"
 		file.write_text(file.read_text() + best_score)
 	
 	def game_over(self):
 		self.text = self.font.render("GAME OVER", True, (255, 255, 255))
 		self.rect = self.text.get_rect()
+		if self.stats.game_on:
+			self.update_best_score()
 		self.stats.game_on = False
 		self.get_key_event()
 
 	def update_username(self):
-		self.user_text_rect.midtop = self.subrect.midbottom
+		self.user_text_rect.midbottom = self.rect.midtop
 		self.screen.blit(self.user_text, self.user_text_rect)
+		self.user_text_rect.y -= 10
+		pg.display.flip()
 		self.stats.player_name = input("Enter a player name:\n")
 
 	def get_key_event(self):
 		for event in pg.event.get():
 			if event.type == pg.KEYDOWN:
-				self.update_best_score()
 				if event.key == pg.K_SPACE:
 					self.stats.reset()
 					self.update_username()
@@ -92,6 +100,7 @@ class Menu:
 		self.subrect.midtop = self.rect.midbottom
 		self.screen.blit(self.text, self.rect)
 		self.screen.blit(self.subtext, self.subrect)
+		self.score_board.display()
 		self.get_key_event()
 
 
@@ -156,5 +165,52 @@ class LifeBar(Sprite):
 
 
 
+class ScoreBoard:
+	def __init__(self, spacewar):
+		self.screen = spacewar.screen
+		self.settings = spacewar.settings
+		self.stats = spacewar.stats
+		self.font = pg.font.Font('freesansbold.ttf', 30)
+		self.color = (255, 255, 255)
+		self.scores = []
+		self.text = []
+		self.rects = []
 
+	def get_scores(self):
+		path = Path("../best_scores.txt")
+		lines = path.read_text().splitlines()
+		scores_data = []
+		for line in lines[1:]:
+			parts = line.split(': ')
+			if len(parts) == 2:
+				player_name, score_time = parts
+				score, time_spent = score_time.split(' in ')
+				scores_data.append({
+					'player_name': player_name,
+					'score': int(score),
+					'time': time_spent.strip()
+				})
+		self.scores = sorted(scores_data, key=lambda x: x['score'], reverse=True)
 
+	def update(self):
+		self.get_scores()
+		self.text.clear()
+		self.rects.clear()
+		for score in self.scores[:3]:
+			text = self.font.render(
+				f"{score['player_name']}: {score['score']} in {score['time']}",
+                True,
+                self.color
+			)
+			self.text.append(text)
+			self.rects.append(text.get_rect())
+
+	def display(self):
+		self.update() 
+		screen_rect = self.screen.get_rect()
+		y_shift = 80
+		for text, rect in zip(self.text, self.rects):
+			rect.midtop = screen_rect.center
+			rect.y += y_shift
+			self.screen.blit(text, rect)
+			y_shift += 40

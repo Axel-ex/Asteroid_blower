@@ -54,7 +54,7 @@ class Asteroid(Sprite):
 			if self.is_out_bounds():
 				self.rect.x = self.settings.screen_width + self.settings.boundary_pad - 1
 
-		if self.x_initial < self.settings.screen_width / 2:
+		elif self.x_initial < self.settings.screen_width / 2:
 			self.rect.x += 1
 			if self.is_out_bounds():
 				self.rect.x = - self.settings.boundary_pad + 1

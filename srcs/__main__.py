@@ -7,8 +7,7 @@ from interface import *
 
 
 class	spacewar():
-	''' Clas to manage assets and behaviour'''
-
+	'''Class containing game's logic'''
 	def __init__(self):
 		pg.init()
 		self.settings = settings()
@@ -48,7 +47,7 @@ class	spacewar():
 		collision = pg.sprite.groupcollide(self.bullets, self.asteroids, True, True)	
 		for bullets, asteroids in collision.items():
 			for asteroid in asteroids:
-				explosion = Explosion(self, asteroid.rect.center, self.settings.explosion_ship)
+				explosion = Explosion(self, asteroid.rect.center, self.settings.explosion_asteroid)
 				self.explosions.add(explosion)
 				self.stats.score += 10
 		if pg.sprite.spritecollideany(self.ship, self.asteroids):
